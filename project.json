@@ -1,0 +1,483 @@
+{
+  "projectId": "c39d1187-c0f4-476b-8a33-d7a700dccad5",
+  "commands": [
+    {
+      "command": "/admin",
+      "description": "Shows admin options for knowledge base, escalations, and system status.",
+      "usage": "/admin",
+      "examples": [
+        "Admin: /admin → Bot: Admin options..."
+      ],
+      "notes": "Requires ADMIN_USER_IDS or admin role in MongoDB."
+    },
+    {
+      "command": "/ask",
+      "description": "Submits a support question and answers from indexed docs and FAQs.",
+      "usage": "/ask How do I reset my password?",
+      "examples": [
+        "User: /ask How do I reset my password? → Bot: grounded answer with source context"
+      ],
+      "notes": "Also available by sending normal text in private chat."
+    },
+    {
+      "command": "/close",
+      "description": "Closes an escalation with a resolution note.",
+      "usage": "/close ESCALATIONID Resolved by sending account recovery steps",
+      "examples": [
+        "Admin: /close 665... Resolved by support → Bot: Closed escalation ..."
+      ],
+      "notes": "Admin-only."
+    },
+    {
+      "command": "/escalate",
+      "description": "Creates a human-review escalation for the current issue.",
+      "usage": "/escalate I still need help with billing",
+      "examples": [
+        "User: /escalate I still need help → Bot: I created escalation ..."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/feedback",
+      "description": "Stores feedback about the last answer.",
+      "usage": "/feedback helpful or /feedback not helpful: missing pricing details",
+      "examples": [
+        "User: /feedback not helpful: missing pricing details → Bot: Thanks. Your feedback was saved for review."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/forgetme",
+      "description": "Clears stored conversation memory for the current chat.",
+      "usage": "/forgetme",
+      "examples": [
+        "User: /forgetme → Bot: Your stored conversation memory for this chat was cleared."
+      ],
+      "notes": "Public privacy command."
+    },
+    {
+      "command": "/help",
+      "description": "Shows available user and admin commands.",
+      "usage": "/help",
+      "examples": [
+        "User: /help → Bot: AnswerForge commands..."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/reindex",
+      "description": "Refreshes searchable knowledge source metadata.",
+      "usage": "/reindex all or /reindex sourceid",
+      "examples": [
+        "Admin: /reindex all → Bot: Reindex requested for all."
+      ],
+      "notes": "Admin-only."
+    },
+    {
+      "command": "/sources",
+      "description": "Lists indexed knowledge sources and statuses.",
+      "usage": "/sources",
+      "examples": [
+        "Admin: /sources → Bot: source IDs and titles"
+      ],
+      "notes": "Admin-only."
+    },
+    {
+      "command": "/start",
+      "description": "Introduces AnswerForge and explains how to ask support questions.",
+      "usage": "/start",
+      "examples": [
+        "User: /start → Bot: Welcome to AnswerForge."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/status",
+      "description": "Shows whether the user has an open escalation in the current chat.",
+      "usage": "/status",
+      "examples": [
+        "User: /status → Bot: You do not have an open escalation in this chat."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/unresolved",
+      "description": "Lists open escalations and negative feedback.",
+      "usage": "/unresolved",
+      "examples": [
+        "Admin: /unresolved → Bot: Open escalations..."
+      ],
+      "notes": "Admin-only."
+    },
+    {
+      "command": "/uploaddocs",
+      "description": "Indexes FAQ or documentation text for retrieval.",
+      "usage": "/uploaddocs Title followed by documentation text",
+      "examples": [
+        "Admin: /uploaddocs Password FAQ\nReset passwords from Settings. → Bot: Indexed source ..."
+      ],
+      "notes": "Admin-only. Supports text, Markdown, CSV, and JSON documents."
+    }
+  ],
+  "aiMessages": [
+    {
+      "role": "user",
+      "content": "Build an AI agent that auto-answers support questions using your docs and FAQs"
+    },
+    {
+      "role": "assistant",
+      "content": "Built AnswerForge as a complete Telegram support agent with docs ingestion, grounded support answers, feedback, escalations, admin workflows, MongoDB persistence, AI Gateway integration, safe polling, and deployment docs.\n\nFiles touched (35): .env.sample, DOCS.md, README.md, package.json, project.json, src/bot.js…\nValidation: ✅ project passes syntax/basic checks after this edit."
+    }
+  ],
+  "createdBy": "695397c85603fcac4c8ea626",
+  "source": "ai-cold-start",
+  "description": "",
+  "platform": "telegram",
+  "usesWebApp": false,
+  "telegramKind": "bot",
+  "planMarkdown": "Bot: AnswerForge\n\nSummary:\nAnswerForge is a Telegram support automation agent that answers customer questions using company documentation and FAQs, escalates unresolved cases to humans, and continuously improves through feedback and knowledge-base updates.\n\nProduct goals:\nProvide fast, accurate answers to common support questions directly in Telegram. Reduce repetitive support workload while keeping a smooth escalation path for complex or sensitive cases. Ground AI responses in approved docs and FAQs rather than open-ended generation. Track user satisfaction, unresolved questions, and knowledge gaps so the support team can improve documentation over time. Support a simple admin workflow for refreshing content, reviewing escalations, and monitoring bot health.\n\nHigh-level architecture:\nRun as a single Node.js ESM service using grammY for Telegram bot handling. The service receives Telegram updates via long polling or webhook, validates user/session context, and routes messages through a support-answer pipeline. The pipeline includes intent detection, retrieval of relevant knowledge-base chunks, AI answer generation with grounding constraints, confidence scoring, response formatting, and escalation handling. Documentation and FAQ content are ingested by an admin-only workflow: source files or text entries are parsed, normalized, split into chunks, embedded, and stored with metadata. MongoDB can store users, conversations, messages, knowledge documents, embeddings or vector-search-compatible records, feedback, and escalation tickets. If large files are uploaded, store the raw assets in generic object storage or filesystem storage and keep references in MongoDB. The AI provider integration should be isolated behind a service interface so models can be swapped without changing bot logic. Background jobs can run in the same process using scheduled tasks for re-indexing, cleanup, and analytics aggregation. No additional infrastructure such as Redis, Kafka, or SQL databases is required.\n\nData model:\nUse MongoDB collections such as users, conversations, messages, knowledgesources, knowledgechunks, feedback, and escalations. users stores Telegram user ID, username, role, language preference, status, creation date, and last activity. conversations stores chat ID, user ID, current state, open escalation ID if any, and timestamps. messages stores user and bot messages, detected intent, retrieved chunk IDs, confidence, AI response metadata, and escalation status. knowledgesources stores uploaded documents, FAQ entries, URLs if supported, version, status, checksum, owner, and last indexed date. knowledgechunks stores source ID, chunk text, title/path, tags, language, embedding vector if supported by the selected MongoDB setup, revision, and visibility status. feedback stores message ID, rating, free-text comment, reason category, and reviewer state. escalations stores user ID, conversation ID, question, AI draft if generated, status, assigned admin if applicable, internal notes, and resolution summary.\n\nKey flows:\nOnboarding: /start introduces the bot, explains that answers come from official docs, and offers help commands. User support flow: the user asks a question, the bot normalizes the text, retrieves relevant FAQ/doc chunks, generates a concise grounded answer, includes references or source labels when available, and asks whether the answer helped. Low-confidence flow: if retrieval confidence is low, the bot asks a clarifying question or offers escalation. Escalation flow: unresolved issues create an escalation record, notify admins or mark the item for review, and tell the user that support will follow up. Feedback flow: users rate answers with helpful/not helpful actions; negative feedback is stored with the original question, answer, and sources for admin review. Knowledge ingestion flow: admins upload or register docs/FAQ content, the bot validates the file or text, chunks and embeds content, marks the new version active, and reports indexing results. Admin review flow: admins list unresolved questions, inspect failed answers, add missing FAQ entries, close escalations, and trigger re-indexing.\n\nTech stack:\nNode.js with ESM as the runtime and application format. grammY for Telegram bot framework using TELEGRAMBOTTOKEN from environment variables. MongoDB for persistence, including users, sessions, conversations, knowledge content, feedback, and escalations. AI integration through a configurable LLM and embedding provider abstraction. Retrieval-augmented generation architecture using document chunking, embeddings, metadata filtering, and answer-generation prompts constrained to retrieved content. Use environment variables for configuration, structured logging for observability, and a validation library for input/config validation. File/image/document uploads should be stored in generic object storage or filesystem storage when needed, with MongoDB storing metadata and references.\n\nNon-functional requirements:\nSecurity: restrict admin commands by Telegram user ID allowlist or role stored in MongoDB, validate uploads, avoid exposing private docs, and never leak system prompts. Reliability: handle Telegram retries idempotently, store message processing metadata, and degrade gracefully when the AI provider is unavailable. Accuracy: require source-grounded answers, use confidence thresholds, display uncertainty, and escalate rather than hallucinate. Performance: cache recent knowledge lookups in process memory where safe, limit prompt size, chunk large documents efficiently, and apply rate limits per user. Privacy: store only necessary chat data, support data deletion workflows, and redact sensitive content in logs. Maintainability: separate modules for bot handlers, AI service, retrieval service, ingestion service, MongoDB repositories, admin workflows, and configuration. Operations: provide health checks, startup validation for TELEGRAMBOTTOKEN and database connectivity, structured logs, error alerts through logs or admin notifications, and safe graceful shutdown.\n\nBot commands:\n• /start — Introduces the support agent and explains how to ask questions. (usage: /start) [user]\n• /help — Shows available commands and explains how the bot uses docs and FAQs. (usage: /help) [user]\n• /ask — Submits a support question explicitly, useful when the chat has other interactions. (usage: /ask How do I reset my password?) [user]\n• /escalate — Creates a human-review escalation for the current issue. (usage: /escalate I still need help with billing) [user]\n• /feedback — Sends feedback about the last answer. (usage: /feedback helpful or /feedback not helpful: missing pricing details) [user]\n• /status — Shows whether the user has an open escalation or pending support request. (usage: /status) [user]\n• /admin — Shows admin options for knowledge base, escalations, and system status. (usage: /admin) [admin]\n• /uploaddocs — Admin-only command to upload or register documentation and FAQ content for indexing. (usage: /uploaddocs followed by a document attachment or text instructions) [admin]\n• /reindex — Admin-only command to rebuild the searchable knowledge index. (usage: /reindex all or /reindex sourceid) [admin]\n• /sources — Admin-only command to list indexed knowledge sources and their status. (usage: /sources) [admin]\n• /unresolved — Admin-only command to list low-confidence questions, negative feedback, and open escalations. (usage: /unresolved) [admin]\n• /close — Admin-only command to close an escalation with a resolution note. (usage: /close ESCALATIONID Resolved by sending account recovery steps) [admin]\n",
+  "planSections": {
+    "productGoals": "Provide fast, accurate answers to common support questions directly in Telegram. Reduce repetitive support workload while keeping a smooth escalation path for complex or sensitive cases. Ground AI responses in approved docs and FAQs rather than open-ended generation. Track user satisfaction, unresolved questions, and knowledge gaps so the support team can improve documentation over time. Support a simple admin workflow for refreshing content, reviewing escalations, and monitoring bot health.",
+    "highLevelArchitecture": "Run as a single Node.js ESM service using grammY for Telegram bot handling. The service receives Telegram updates via long polling or webhook, validates user/session context, and routes messages through a support-answer pipeline. The pipeline includes intent detection, retrieval of relevant knowledge-base chunks, AI answer generation with grounding constraints, confidence scoring, response formatting, and escalation handling. Documentation and FAQ content are ingested by an admin-only workflow: source files or text entries are parsed, normalized, split into chunks, embedded, and stored with metadata. MongoDB can store users, conversations, messages, knowledge documents, embeddings or vector-search-compatible records, feedback, and escalation tickets. If large files are uploaded, store the raw assets in generic object storage or filesystem storage and keep references in MongoDB. The AI provider integration should be isolated behind a service interface so models can be swapped without changing bot logic. Background jobs can run in the same process using scheduled tasks for re-indexing, cleanup, and analytics aggregation. No additional infrastructure such as Redis, Kafka, or SQL databases is required.",
+    "dataModel": "Use MongoDB collections such as users, conversations, messages, knowledgesources, knowledgechunks, feedback, and escalations. users stores Telegram user ID, username, role, language preference, status, creation date, and last activity. conversations stores chat ID, user ID, current state, open escalation ID if any, and timestamps. messages stores user and bot messages, detected intent, retrieved chunk IDs, confidence, AI response metadata, and escalation status. knowledgesources stores uploaded documents, FAQ entries, URLs if supported, version, status, checksum, owner, and last indexed date. knowledgechunks stores source ID, chunk text, title/path, tags, language, embedding vector if supported by the selected MongoDB setup, revision, and visibility status. feedback stores message ID, rating, free-text comment, reason category, and reviewer state. escalations stores user ID, conversation ID, question, AI draft if generated, status, assigned admin if applicable, internal notes, and resolution summary.",
+    "keyFlows": "Onboarding: /start introduces the bot, explains that answers come from official docs, and offers help commands. User support flow: the user asks a question, the bot normalizes the text, retrieves relevant FAQ/doc chunks, generates a concise grounded answer, includes references or source labels when available, and asks whether the answer helped. Low-confidence flow: if retrieval confidence is low, the bot asks a clarifying question or offers escalation. Escalation flow: unresolved issues create an escalation record, notify admins or mark the item for review, and tell the user that support will follow up. Feedback flow: users rate answers with helpful/not helpful actions; negative feedback is stored with the original question, answer, and sources for admin review. Knowledge ingestion flow: admins upload or register docs/FAQ content, the bot validates the file or text, chunks and embeds content, marks the new version active, and reports indexing results. Admin review flow: admins list unresolved questions, inspect failed answers, add missing FAQ entries, close escalations, and trigger re-indexing.",
+    "techStack": "Node.js with ESM as the runtime and application format. grammY for Telegram bot framework using TELEGRAMBOTTOKEN from environment variables. MongoDB for persistence, including users, sessions, conversations, knowledge content, feedback, and escalations. AI integration through a configurable LLM and embedding provider abstraction. Retrieval-augmented generation architecture using document chunking, embeddings, metadata filtering, and answer-generation prompts constrained to retrieved content. Use environment variables for configuration, structured logging for observability, and a validation library for input/config validation. File/image/document uploads should be stored in generic object storage or filesystem storage when needed, with MongoDB storing metadata and references.",
+    "nonFunctional": "Security: restrict admin commands by Telegram user ID allowlist or role stored in MongoDB, validate uploads, avoid exposing private docs, and never leak system prompts. Reliability: handle Telegram retries idempotently, store message processing metadata, and degrade gracefully when the AI provider is unavailable. Accuracy: require source-grounded answers, use confidence thresholds, display uncertainty, and escalate rather than hallucinate. Performance: cache recent knowledge lookups in process memory where safe, limit prompt size, chunk large documents efficiently, and apply rate limits per user. Privacy: store only necessary chat data, support data deletion workflows, and redact sensitive content in logs. Maintainability: separate modules for bot handlers, AI service, retrieval service, ingestion service, MongoDB repositories, admin workflows, and configuration. Operations: provide health checks, startup validation for TELEGRAMBOTTOKEN and database connectivity, structured logs, error alerts through logs or admin notifications, and safe graceful shutdown."
+  },
+  "planCommands": [
+    {
+      "name": "/start",
+      "description": "Introduces the support agent and explains how to ask questions.",
+      "usage": "/start",
+      "category": "user"
+    },
+    {
+      "name": "/help",
+      "description": "Shows available commands and explains how the bot uses docs and FAQs.",
+      "usage": "/help",
+      "category": "user"
+    },
+    {
+      "name": "/ask",
+      "description": "Submits a support question explicitly, useful when the chat has other interactions.",
+      "usage": "/ask How do I reset my password?",
+      "category": "user"
+    },
+    {
+      "name": "/escalate",
+      "description": "Creates a human-review escalation for the current issue.",
+      "usage": "/escalate I still need help with billing",
+      "category": "user"
+    },
+    {
+      "name": "/feedback",
+      "description": "Sends feedback about the last answer.",
+      "usage": "/feedback helpful or /feedback not helpful: missing pricing details",
+      "category": "user"
+    },
+    {
+      "name": "/status",
+      "description": "Shows whether the user has an open escalation or pending support request.",
+      "usage": "/status",
+      "category": "user"
+    },
+    {
+      "name": "/admin",
+      "description": "Shows admin options for knowledge base, escalations, and system status.",
+      "usage": "/admin",
+      "category": "admin"
+    },
+    {
+      "name": "/uploaddocs",
+      "description": "Admin-only command to upload or register documentation and FAQ content for indexing.",
+      "usage": "/uploaddocs followed by a document attachment or text instructions",
+      "category": "admin"
+    },
+    {
+      "name": "/reindex",
+      "description": "Admin-only command to rebuild the searchable knowledge index.",
+      "usage": "/reindex all or /reindex sourceid",
+      "category": "admin"
+    },
+    {
+      "name": "/sources",
+      "description": "Admin-only command to list indexed knowledge sources and their status.",
+      "usage": "/sources",
+      "category": "admin"
+    },
+    {
+      "name": "/unresolved",
+      "description": "Admin-only command to list low-confidence questions, negative feedback, and open escalations.",
+      "usage": "/unresolved",
+      "category": "admin"
+    },
+    {
+      "name": "/close",
+      "description": "Admin-only command to close an escalation with a resolution note.",
+      "usage": "/close ESCALATIONID Resolved by sending account recovery steps",
+      "category": "admin"
+    }
+  ],
+  "envVarDocs": [
+    {
+      "key": "TELEGRAM_BOT_TOKEN",
+      "title": "Telegram Bot Token",
+      "description": "Required token used by grammY to connect to Telegram.",
+      "usage": "Read in src/lib/config.js and required during boot.",
+      "howToGet": "Create a bot with BotFather on Telegram.",
+      "example": "123456789:ABCDEF_format_only",
+      "isSecret": true,
+      "required": true
+    },
+    {
+      "key": "MONGODB_URI",
+      "title": "MongoDB URI",
+      "description": "Stores users, messages, memory, knowledge docs, feedback, and escalations.",
+      "usage": "Used by src/lib/db.js. If missing, bounded in-memory fallback is used.",
+      "howToGet": "Create a MongoDB database and copy its connection string.",
+      "example": "mongodb+srv://user:password@cluster/dbname",
+      "isSecret": true,
+      "required": false
+    },
+    {
+      "key": "COOKMYBOTS_AI_ENDPOINT",
+      "title": "CookMyBots AI Endpoint",
+      "description": "Base URL for the CookMyBots AI Gateway. Do not include /chat.",
+      "usage": "POST {COOKMYBOTS_AI_ENDPOINT}/chat for support answers.",
+      "howToGet": "Provided by CookMyBots.",
+      "example": "https://api.cookmybots.com/api/ai",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "COOKMYBOTS_AI_KEY",
+      "title": "CookMyBots AI Key",
+      "description": "Secret key for AI Gateway calls.",
+      "usage": "Sent as Authorization Bearer header by src/lib/ai.js.",
+      "howToGet": "Provided by CookMyBots.",
+      "example": "cmb_ai_key_format_only",
+      "isSecret": true,
+      "required": false
+    },
+    {
+      "key": "AI_TIMEOUT_MS",
+      "title": "AI Timeout",
+      "description": "AI request timeout in milliseconds.",
+      "usage": "Defaults to 600000 for slow AI responses.",
+      "example": "600000",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "AI_MAX_RETRIES",
+      "title": "AI Max Retries",
+      "description": "Retry count for transient AI failures.",
+      "usage": "Defaults to 2.",
+      "example": "2",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "CONCURRENCY",
+      "title": "General Concurrency",
+      "description": "Optional concurrency tuning value retained for runtime configuration.",
+      "usage": "Read by config with safe fallback.",
+      "example": "20",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "AI_MODEL",
+      "title": "AI Model",
+      "description": "Optional model override passed to the AI Gateway.",
+      "usage": "If empty, the gateway default model is used.",
+      "example": "support-model",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "ADMIN_USER_IDS",
+      "title": "Admin User IDs",
+      "description": "Comma-separated Telegram numeric user IDs allowed to run admin commands.",
+      "usage": "Checked by src/services/admin.js.",
+      "howToGet": "Use Telegram user info tools or logs to find your numeric user ID.",
+      "example": "123456789,987654321",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "SUPPORT_CONFIDENCE_THRESHOLD",
+      "title": "Support Confidence Threshold",
+      "description": "Minimum retrieval confidence before auto-escalation is created.",
+      "usage": "Defaults to 0.35.",
+      "example": "0.35",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "KNOWLEDGE_TOP_K",
+      "title": "Knowledge Top K",
+      "description": "Number of chunks retrieved per support question.",
+      "usage": "Defaults to 5.",
+      "example": "5",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "MAX_UPLOAD_BYTES",
+      "title": "Max Upload Bytes",
+      "description": "Maximum supported Telegram document size for /uploaddocs.",
+      "usage": "Defaults to 1048576.",
+      "example": "1048576",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "MAX_UPLOAD_CHARS",
+      "title": "Max Upload Characters",
+      "description": "Maximum text characters indexed from one upload.",
+      "usage": "Defaults to 120000.",
+      "example": "120000",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "GLOBAL_AI_CAP",
+      "title": "Global AI Cap",
+      "description": "Maximum simultaneous AI support jobs across the process.",
+      "usage": "Defaults to 1 for safe Render memory use.",
+      "example": "1",
+      "isSecret": false,
+      "required": false
+    },
+    {
+      "key": "RUNNER_CONCURRENCY",
+      "title": "Runner Concurrency",
+      "description": "Telegram update runner concurrency.",
+      "usage": "Defaults to 1 for AI agent safety.",
+      "example": "1",
+      "isSecret": false,
+      "required": false
+    }
+  ],
+  "commandDocs": [
+    {
+      "command": "/start",
+      "description": "Introduces AnswerForge and explains how to ask support questions.",
+      "usage": "/start",
+      "examples": [
+        "User: /start → Bot: Welcome to AnswerForge."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/help",
+      "description": "Shows available user and admin commands.",
+      "usage": "/help",
+      "examples": [
+        "User: /help → Bot: AnswerForge commands..."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/ask",
+      "description": "Submits a support question and answers from indexed docs and FAQs.",
+      "usage": "/ask How do I reset my password?",
+      "examples": [
+        "User: /ask How do I reset my password? → Bot: grounded answer with source context"
+      ],
+      "notes": "Also available by sending normal text in private chat."
+    },
+    {
+      "command": "/escalate",
+      "description": "Creates a human-review escalation for the current issue.",
+      "usage": "/escalate I still need help with billing",
+      "examples": [
+        "User: /escalate I still need help → Bot: I created escalation ..."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/feedback",
+      "description": "Stores feedback about the last answer.",
+      "usage": "/feedback helpful or /feedback not helpful: missing pricing details",
+      "examples": [
+        "User: /feedback not helpful: missing pricing details → Bot: Thanks. Your feedback was saved for review."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/status",
+      "description": "Shows whether the user has an open escalation in the current chat.",
+      "usage": "/status",
+      "examples": [
+        "User: /status → Bot: You do not have an open escalation in this chat."
+      ],
+      "notes": "Public user command."
+    },
+    {
+      "command": "/forgetme",
+      "description": "Clears stored conversation memory for the current chat.",
+      "usage": "/forgetme",
+      "examples": [
+        "User: /forgetme → Bot: Your stored conversation memory for this chat was cleared."
+      ],
+      "notes": "Public privacy command."
+    },
+    {
+      "command": "/admin",
+      "description": "Shows admin options for knowledge base, escalations, and system status.",
+      "usage": "/admin",
+      "examples": [
+        "Admin: /admin → Bot: Admin options..."
+      ],
+      "notes": "Requires ADMIN_USER_IDS or admin role in MongoDB."
+    },
+    {
+      "command": "/uploaddocs",
+      "description": "Indexes FAQ or documentation text for retrieval.",
+      "usage": "/uploaddocs Title followed by documentation text",
+      "examples": [
+        "Admin: /uploaddocs Password FAQ\nReset passwords from Settings. → Bot: Indexed source ..."
+      ],
+      "notes": "Admin-only. Supports text, Markdown, CSV, and JSON documents."
+    },
+    {
+      "command": "/reindex",
+      "description": "Refreshes searchable knowledge source metadata.",
+      "usage": "/reindex all or /reindex sourceid",
+      "examples": [
+        "Admin: /reindex all → Bot: Reindex requested for all."
+      ],
+      "notes": "Admin-only."
+    },
+    {
+      "command": "/sources",
+      "description": "Lists indexed knowledge sources and statuses.",
+      "usage": "/sources",
+      "examples": [
+        "Admin: /sources → Bot: source IDs and titles"
+      ],
+      "notes": "Admin-only."
+    },
+    {
+      "command": "/unresolved",
+      "description": "Lists open escalations and negative feedback.",
+      "usage": "/unresolved",
+      "examples": [
+        "Admin: /unresolved → Bot: Open escalations..."
+      ],
+      "notes": "Admin-only."
+    },
+    {
+      "command": "/close",
+      "description": "Closes an escalation with a resolution note.",
+      "usage": "/close ESCALATIONID Resolved by sending account recovery steps",
+      "examples": [
+        "Admin: /close 665... Resolved by support → Bot: Closed escalation ..."
+      ],
+      "notes": "Admin-only."
+    }
+  ],
+  "title": "AnswerForge"
+}

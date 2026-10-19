@@ -1,0 +1,54 @@
+[
+  {
+    "name": "admin",
+    "file": "src/commands/admin.js"
+  },
+  {
+    "name": "ask",
+    "file": "src/commands/ask.js"
+  },
+  {
+    "name": "close",
+    "file": "src/commands/close.js"
+  },
+  {
+    "name": "escalate",
+    "file": "src/commands/escalate.js"
+  },
+  {
+    "name": "feedback",
+    "file": "src/commands/feedback.js"
+  },
+  {
+    "name": "forgetme",
+    "file": "src/commands/forgetme.js"
+  },
+  {
+    "name": "help",
+    "file": "src/commands/help.js"
+  },
+  {
+    "name": "reindex",
+    "file": "src/commands/reindex.js"
+  },
+  {
+    "name": "sources",
+    "file": "src/commands/sources.js"
+  },
+  {
+    "name": "start",
+    "file": "src/commands/start.js"
+  },
+  {
+    "name": "status",
+    "file": "src/commands/status.js"
+  },
+  {
+    "name": "unresolved",
+    "file": "src/commands/unresolved.js"
+  },
+  {
+    "name": "uploaddocs",
+    "file": "src/commands/uploaddocs.js"
+  }
+]
